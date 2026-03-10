@@ -1,7 +1,7 @@
 # Dockerfile untuk traffic-extractor (Go/Gin)
 # File ini di-copy ke folder extractor/ oleh setup.sh saat pertama kali setup
 
-FROM golang:1.23-alpine AS builder
+FROM golang:alpine AS builder
 
 WORKDIR /app
 
