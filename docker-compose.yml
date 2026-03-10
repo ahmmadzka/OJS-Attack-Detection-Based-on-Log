@@ -1,0 +1,85 @@
+
+services:
+
+  # NGINX Reverse Proxy dan Traffic Mirror
+  nginx:
+    image: nginx:stable
+    container_name: ojs-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/mirror.conf:/etc/nginx/conf.d/ojs.conf:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - ojs
+      - extractor
+    networks:
+      - ojs-network
+
+  # Aplikasi OJS
+  ojs:
+    build:
+      context: ./ojs
+    container_name: ojs-app
+    environment:
+      OJS_CLI_INSTALL: "0"
+      OJS_DB_HOST: postgres
+      OJS_DB_DRIVER: pgsql
+      OJS_DB_NAME: ${POSTGRES_DB}
+      OJS_DB_USER: ${POSTGRES_USER}
+      OJS_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ojs-files:/var/www/files
+      - ojs-public:/var/www/html/public
+    depends_on:
+      - postgres
+    networks:
+      - ojs-network
+
+  # Database PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: ojs-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ojs-network
+
+  # Traffic Extractor (Go/Gin)
+  extractor:
+    build: https://github.com/yogarn/traffic-extractor.git
+    container_name: traffic-extractor
+    ports:
+      - "8080:8081"
+    networks:
+      - ojs-network
+
+  # ML Inference Service
+  # Setelah model ML siap, uncomment blok di bawah saat integrasi:
+  #
+  # ml-service:
+  #   build:
+  #     context: ./ml-service
+  #   container_name: ml-service
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+  #     - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+  #   networks:
+  #     - ojs-network
+
+networks:
+  ojs-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  ojs-files:
+  ojs-public:

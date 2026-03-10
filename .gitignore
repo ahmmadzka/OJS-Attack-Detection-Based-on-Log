@@ -1,0 +1,21 @@
+# ===== Environment =====
+.env
+
+# ===== Nginx logs (generated at runtime) =====
+nginx/logs/*.log
+
+# ===== OS / IDE =====
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Go build artifacts =====
+extractor/*.exe
+extractor/requests.log
+
+# ===== Docker =====
+*.log
+
