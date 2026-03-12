@@ -1,11 +1,10 @@
--- Skrip inisialisasi PostgreSQL untuk Proyek OJS IDS
--- Skrip ini berjalan otomatis saat awal container dinyalakan
+-- skrip inisialisasi postgresql proyek ojs ids
+-- berjalan otomatis saat container start
 
--- Pastikan database tersedia (dibuat via POSTGRES_DB env var)
--- Buat ekstensi tambahan jika diperlukan
+-- pastikan database tersedia dibuat via postgres db env var
 
--- Aktifkan pg_trgm untuk pencarian teks (berguna untuk analisis log)
+-- aktifkan pg trgm untuk pencarian teks analisis log
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
--- Verifikasi database sudah siap
+-- verifikasi database udah siap
 SELECT current_database(), current_user, version();

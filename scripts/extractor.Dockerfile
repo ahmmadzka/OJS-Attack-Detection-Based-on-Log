@@ -1,5 +1,5 @@
-# Dockerfile untuk traffic-extractor (Go/Gin)
-# File ini di-copy ke folder extractor/ oleh setup.sh saat pertama kali setup
+# dockerfile traffic extractor go/gin
+# file ini di copy ke folder extractor oleh setup.sh saat setup pertama
 
 FROM golang:alpine AS builder
 

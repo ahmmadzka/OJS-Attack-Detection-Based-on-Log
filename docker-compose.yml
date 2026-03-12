@@ -1,7 +1,5 @@
-
 services:
-
-  # NGINX Reverse Proxy dan Traffic Mirror
+  # nginx reverse proxy dan traffic mirror
   nginx:
     image: nginx:stable
     container_name: ojs-nginx
@@ -14,7 +12,7 @@ services:
       - ojs
       - extractor
 
-  # Aplikasi OJS
+  # ojs
   ojs:
     build:
       context: ./ojs
@@ -50,7 +48,7 @@ services:
     networks:
       - ojs-network
 
-  # Traffic Extractor (Go/Gin)
+  # traffic extractor go/gin
   extractor:
     build:
       context: ./extractor
@@ -60,8 +58,7 @@ services:
     networks:
       - ojs-network
 
-  # ML Inference Service
-  # Setelah model ML siap, uncomment blok di bawah saat integrasi:
+  # prepare buat ml service maybee
   #
   # ml-service:
   #   build:
@@ -72,13 +69,8 @@ services:
   #   environment:
   #     - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
   #     - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
-  #   networks:
-  #     - ojs-network
-
-networks:
-  ojs-network:
-    driver: bridge
-
+  #   networks: ojs-network
+  
 volumes:
   postgres-data:
   ojs-files:

@@ -1,8 +1,4 @@
-# OJS Log-Based Intrusion Detection System
-
-Sistem klasifikasi serangan pada website berbasis OJS menggunakan Machine Learning untuk mendeteksi anomali dan pola serangan secara real-time.
-
-## Architecture
+## arsitektur
 
 ```
 Client ──► NGINX (reverse proxy + mirror)
@@ -14,7 +10,7 @@ Client ──► NGINX (reverse proxy + mirror)
           PostgreSQL      ML Service ──► Telegram Alert
 ```
 
-## Components
+## komponen
 
 | Service | Description | Port |
 |---------|-------------|------|
@@ -22,11 +18,11 @@ Client ──► NGINX (reverse proxy + mirror)
 | **OJS** | Open Journal Systems platform | internal |
 | **PostgreSQL** | Database untuk OJS | internal |
 | **Extractor** | Traffic log extractor (Go/Gin) diclone dari [`yogarn/traffic-extractor`](https://github.com/yogarn/traffic-extractor) | `8080` (host) → `8081` (container) |
-| **ML Service** | ML inference API — *belum aktif, uncomment di `docker-compose.yml` saat siap* | `5000` |
+| **ML Service** | ML inference API — *not yet active*, uncomment di `docker-compose.yml` | `5000` |
 
-> **Catatan Port Extractor:** `docker-compose.yml` memetakan port host `8080` ke port container `8081`. Nginx di `mirror.conf` sudah dikonfigurasi memanggil `http://extractor:8081` (port container). Pastikan repo `yogarn/traffic-extractor` memang listen di port **8081**.
+> **daftar port extractor:** `docker-compose.yml`, port host `8080` ke port container `8081`. Nginx di `mirror.conf` udah dikonfigurasi memanggil `http://extractor:8081` (port container). Traffic log extractor (Go/Gin) dari repo `yogarn/traffic-extractor` akan listen di port **8081**.
 
-## Project Structure
+## struktur projek
 
 ```
 ojs-ids-project/
@@ -51,9 +47,4 @@ ojs-ids-project/
 ```
 
 ## Integrating ML Service
-
-Setelah model ML siap:
-1. Tambahkan folder `ml-service/` di root project
-2. Uncomment blok `ml-service` di `docker-compose.yml`
-3. Isi `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` di `.env`
-4. Jalankan ulang: `docker compose up -d --build`
+OTW
