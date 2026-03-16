@@ -32,8 +32,10 @@ else
     echo " .env sudah ada"
 fi
 
-# direktori yang dibutuhkan
+# direktori dan file yang dibutuhkan
 mkdir -p nginx/logs
+mkdir -p extractor/logs
+touch extractor/requests.log
 
 # container docker
 docker compose up -d --build
