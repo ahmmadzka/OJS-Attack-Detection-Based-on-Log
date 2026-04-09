@@ -56,12 +56,6 @@ if [ "$FIRST_RUN" = true ]; then
     echo "Copy config"
     docker cp ojs-app:/var/www/html/config.inc.php "$CONFIG_FILE"
 
-    # inject mount if not exist
-    if ! grep -q "config.inc.php:/var/www/html/config.inc.php" docker-compose.yml; then
-        echo "Inject config mount"
-        sed -i '/ojs-public/a\      - ./ojs/config.inc.php:/var/www/html/config.inc.php' docker-compose.yml
-    fi
-
     echo "Restart with persistent config"
     docker compose down
     docker compose up -d
