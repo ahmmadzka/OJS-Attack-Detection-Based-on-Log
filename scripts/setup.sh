@@ -8,7 +8,7 @@ echo "Setup project"
 CONFIG_FILE="./ojs/config.inc.php"
 
 # detect first run
-if [ ! -f "$CONFIG_FILE" ]; then
+if [ ! -f "$CONFIG_FILE" ] || [ ! -s "$CONFIG_FILE" ]; then
     FIRST_RUN=true
     echo "First run"
 else
@@ -36,31 +36,68 @@ fi
 mkdir -p nginx/logs
 touch extractor/requests.log
 
-# start containers
+# ── FIRST RUN ────────────────────────────────────────────────────────────────
 if [ "$FIRST_RUN" = true ]; then
-    docker compose up -d --build
-else
-    docker compose up -d
-fi
 
-# first run logic
-if [ "$FIRST_RUN" = true ]; then
-    echo "Open http://localhost and finish OJS installation"
-    read -p "Press ENTER after install done..." _
+    touch "$CONFIG_FILE"
+    chmod 666 "$CONFIG_FILE"
+    echo "Created empty config.inc.php (writable)"
+
+    # Inject mount ke docker-compose.yml
+    if ! grep -q "config.inc.php:/var/www/html/config.inc.php" docker-compose.yml; then
+        echo "Injecting config mount into docker-compose.yml..."
+        sed -i '/ojs-public/a\      - ./ojs\/config.inc.php:\/var\/www\/html\/config.inc.php' docker-compose.yml
+    fi
+
+    docker compose up -d --build
+
+    echo ""
+    echo "============================================================"
+    echo "  OJS sedang berjalan."
+    echo "  Buka http://localhost dan selesaikan instalasi OJS."
+    echo "  Setelah selesai, tekan ENTER untuk melanjutkan..."
+    echo "============================================================"
+    read -p "" _
 
     echo "Waiting for container..."
-    until docker exec ojs-app ls /var/www/html >/dev/null 2>&1; do
+    until docker exec ojs-app ls /var/www/html/config.inc.php >/dev/null 2>&1; do
         sleep 2
     done
 
-    echo "Copy config"
-    docker cp ojs-app:/var/www/html/config.inc.php "$CONFIG_FILE"
+    # Cek apakah installer berhasil nulis config 
+    CONFIG_SIZE=$(docker exec ojs-app wc -c < /var/www/html/config.inc.php 2>/dev/null || echo 0)
+    if [ "$CONFIG_SIZE" -gt 100 ]; then
+        echo "Config berhasil ditulis"
+        # Sync balik ke host (untuk backup/persistent)
+        docker cp ojs-app:/var/www/html/config.inc.php "$CONFIG_FILE"
+        echo "Config disync ke host: $CONFIG_FILE"
+    else
+        echo "Installer tidak bisa menulis config"
+        echo "Silakan copy isi config dari halaman install OJS,"
+        echo "lalu paste ke file: $CONFIG_FILE"
+        read -p "Tekan ENTER setelah file config diisi..." _
+    fi
 
-    echo "Restart with persistent config"
+    echo "Restarting with persistent config..."
     docker compose down
     docker compose up -d
 
+    echo ""
     echo "Setup complete (persistent mode active)"
+
+# ── RESTART / DEBUG ──────────────────────────────────────────────────────────
 else
-    echo "Already configured"
+
+    docker compose up -d
+
+    echo ""
+    echo "Container started (existing config)"
+    echo ""
+    echo "Useful commands:"
+    echo "  docker compose logs -f ojs        → OJS logs"
+    echo "  docker compose logs -f nginx      → NGINX logs"
+    echo "  docker compose logs -f extractor  → Extractor logs"
+    echo "  docker exec -it ojs-app bash      → Shell ke OJS container"
+    echo "  docker compose down               → Stop semua container"
+
 fi
